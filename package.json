@@ -1,0 +1,35 @@
+{
+  "name": "deezer-arl",
+  "version": "1.0.0",
+  "description": "Universal Deezer ARL Manager & Auto-Login Service",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:prod": "npm run build && node dist/index.js"
+  },
+  "keywords": [
+    "deezer",
+    "arl",
+    "automation",
+    "sqlite",
+    "music-bot"
+  ],
+  "author": "lrmn7",
+  "license": "MIT",
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "better-sqlite3": "^11.8.1",
+    "dotenv": "^16.4.7",
+    "hono": "^4.6.14",
+    "playwright": "^1.62.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.7",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

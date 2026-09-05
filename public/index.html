@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deezer ARL Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+  <div class="app-container">
+    <header class="navbar">
+      <div class="brand" style="cursor: pointer;" id="navBrandLogo">
+        <div class="logo-icon">
+          <i data-lucide="music-2"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Deezer ARL Hub</h1>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <button id="btnNavLogout" class="btn btn-secondary btn-sm" style="display: none;">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </header>
+    <main class="main-content">
+      <div id="publicView">
+        <section class="banner-card" id="activeArlBanner">
+          <div class="banner-info">
+            <div class="banner-tag">
+              <span class="pulse-dot"></span>
+              <span>ACTIVE STREAM TOKEN</span>
+            </div>
+            <div class="banner-details">
+              <h2>Deezer Audio Stream ARL</h2>
+              <p>Direct lossless audio session token for Discord music bots and personal players.</p>
+            </div>
+          </div>
+          <div class="banner-actions">
+            <div class="arl-preview-box">
+              <code id="activeArlCode">Loading active ARL token...</code>
+            </div>
+            <button id="btnCopyActiveArl" class="btn btn-glow">
+              <i data-lucide="copy"></i>
+              <span>Copy ARL</span>
+            </button>
+          </div>
+        </section>
+        <section class="docs-section" style="margin-top: 1.5rem;">
+          <div class="section-title-wrap">
+            <h2>API Documentation & Usage</h2>
+            <p>Access fresh, self-healing, auto-rotated ARL tokens via public REST endpoints without authentication.</p>
+          </div>
+          <div class="doc-block">
+            <h4>1. Plaintext ARL (Recommended for Music Bots)</h4>
+            <p>Directly returns the 192-character token string for single-line HTTP requests.</p>
+            <pre><code>GET /api/arl/raw
+GET /api/arl/raw?rotate=true</code></pre>
+            <div class="code-example-wrap">
+              <span class="code-lang">JavaScript / TypeScript (axios)</span>
+              <pre><code>import axios from "axios";
+
+// Fetch active ARL token directly
+const arl = (await axios.get("https://deezer-arl.listune.app/api/arl/raw?rotate=true")).data;</code></pre>
+            </div>
+            <div class="code-example-wrap">
+              <span class="code-lang">cURL</span>
+              <pre><code>curl -s https://deezer-arl.listune.app/api/arl/raw</code></pre>
+            </div>
+          </div>
+          <div class="doc-block">
+            <h4>2. JSON Response with Account Metadata</h4>
+            <p>Returns the ARL token along with account tier and pool health metrics.</p>
+            <pre><code>GET /api/arl
+GET /api/arl?rotate=true</code></pre>
+            <div class="code-example-wrap">
+              <span class="code-lang">JSON Response (200 OK)</span>
+              <pre><code>{
+  "success": true,
+  "data": {
+    "arl": "0f433ab01c80b2b08d7cc585945ffbdfac9f261a8ec623312ade7d4dbea41282...",
+    "account": {
+      "id": "3fb4fa1c-0b93-4bc8-ad34-dbe8f30490e7",
+      "label": "Primary Account",
+      "tier": "FREE",
+      "country": "ID"
+    }
+  }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="doc-block">
+            <h4>3. Dynamic Integration in Bot Service (listune)</h4>
+            <p>Automatically fetch or renew ARL dynamically at runtime without restarting your bot process.</p>
+            <pre><code>import axios from "axios";
+
+export async function getFreshDeezerArl(): Promise&lt;string | null&gt; {
+  try {
+    const res = await axios.get("https://deezer-arl.listune.app/api/arl/raw?rotate=true");
+    if (res.data && res.data.length === 192) {
+      return res.data.trim();
+    }
+  } catch (err) {
+    console.warn("ARL Manager unreachable, using fallback token.");
+  }
+  return null;
+}</code></pre>
+          </div>
+        </section>
+      </div>
+      <div id="adminLoginView" style="display: none; max-width: 420px; margin: 3rem auto;">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title-wrap">
+              <div class="modal-icon">
+                <i data-lucide="shield-check"></i>
+              </div>
+              <div>
+                <h3>Admin Portal</h3>
+                <p>Enter administrative password to manage accounts</p>
+              </div>
+            </div>
+          </div>
+          <form id="adminLoginForm" class="modal-form">
+            <div class="form-group">
+              <label for="inputAdminPassword">Admin Password</label>
+              <input type="password" id="inputAdminPassword" placeholder="Enter admin password..." required autofocus>
+              <span class="form-hint">Configured via <code>ADMIN_PASSWORD</code> in your environment file.</span>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" id="btnCancelAdminLogin">Back to Public</button>
+              <button type="submit" class="btn btn-primary" id="btnSubmitAdminLogin">
+                <i data-lucide="key"></i>
+                <span>Unlock Portal</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div id="adminDashboardView" style="display: none;">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 style="font-size: 1.35rem; font-weight: 700;">Account Pool Management</h2>
+            <p style="color: var(--text-dim); font-size: 0.84rem;">Manage configured Deezer accounts, token health, and
+              auto-renewals.</p>
+          </div>
+          <div style="display: flex; gap: 0.75rem;">
+            <button id="btnRefreshAll" class="btn btn-secondary btn-sm">
+              <i data-lucide="rotate-cw" id="iconRefreshAll"></i>
+              <span>Health Check All</span>
+            </button>
+            <button id="btnOpenAddModal" class="btn btn-primary btn-sm">
+              <i data-lucide="plus"></i>
+              <span>+ Add Account</span>
+            </button>
+          </div>
+        </div>
+        <section class="table-section card">
+          <div class="table-header">
+            <div class="table-title">
+              <h2>Accounts Pool</h2>
+              <span class="counter" id="accountCountBadge">0 Accounts</span>
+            </div>
+            <div class="table-controls">
+              <div class="search-input-wrap">
+                <i data-lucide="search"></i>
+                <input type="text" id="searchInput" placeholder="Search accounts...">
+              </div>
+              <div class="filter-pills">
+                <button class="pill-btn active" data-filter="ALL">All</button>
+                <button class="pill-btn" data-filter="ACTIVE">Active</button>
+                <button class="pill-btn" data-filter="EXPIRED">Expired</button>
+                <button class="pill-btn" data-filter="BLOCKED">Blocked</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Account</th>
+                  <th>User Profile</th>
+                  <th>Tier</th>
+                  <th>Status</th>
+                  <th>Last Checked</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="accountsTableBody">
+                <tr>
+                  <td colspan="6" class="table-empty">Loading accounts from database...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>Made with love by <a href="https://lrmn.wtf" target="_blank" rel="noopener noreferrer">L RMN</a></p>
+    </footer>
+  </div>
+  <div class="modal-overlay" id="addAccountModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon">
+            <i data-lucide="user-plus"></i>
+          </div>
+          <div>
+            <h3>Add Deezer Account</h3>
+            <p>Automated browser login will extract the ARL token</p>
+          </div>
+        </div>
+        <button class="modal-close" id="btnCloseAddModal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form id="addAccountForm" class="modal-form">
+        <div class="form-group">
+          <label for="inputLabel">Account Label / Name</label>
+          <input type="text" id="inputLabel" placeholder="e.g. Primary Deezer" required>
+        </div>
+        <div class="form-group">
+          <label for="inputEmail">Deezer Email</label>
+          <input type="email" id="inputEmail" placeholder="your_email@domain.com" required>
+        </div>
+        <div class="form-group">
+          <label for="inputPassword">Deezer Password</label>
+          <input type="password" id="inputPassword" placeholder="••••••••••••" required>
+          <span class="form-hint">Stored securely for automated session renewal.</span>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="btnCancelAddModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitAddAccount">
+            <i data-lucide="sparkles" id="iconSubmitLogin"></i>
+            <span>Login & Extract ARL</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/app.js?v=2" type="module"></script>
+</body>
+
+</html>
